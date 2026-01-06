@@ -8,9 +8,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@tailwindcss/vite": "^4.1.18",
     "@tanstack/react-query": "latest",
     "react": "latest",
     "react-dom": "latest",
+    "tailwindcss": "^4.1.18",
     "viem": "latest",
     "wagmi": "latest"
   },
