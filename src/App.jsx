@@ -1,8 +1,8 @@
 import { useConnect, useConnection, useConnectors, useDisconnect } from "wagmi";
 import "tailwindcss";
-import { useSendTransaction } from "wagmi";
+import { useSendTransaction } from "wagmi"
 import { parseEther } from "viem"
-import { useEffect, useState } from "react";
+import { useEffect, useState } from "react"
 function App() {
   const connection = useConnection();
   const { connect, status, error } = useConnect();
@@ -18,16 +18,21 @@ function App() {
   }
   useEffect(()=>{
     if (!txError) return;
-    setErrorMsg(()=> {
-      return `${txError.message.slice(0, 50)}`});
+    setErrorMsg(()=> {return `${txError.message.slice(0, 50)}`});
     const time = setTimeout(() => {
       setErrorMsg(null)
-    }, 3000)
+    }, 1000)
     return () => clearTimeout(time)
   }, [txError])
 
   function sendEth() {
-    if (!connection.addresses?.[0]) return;
+    if (!connection.addresses?.[0]){
+      setErrorMsg('No address found. Please connect your wallet.')
+      const time = setTimeout(()=> {
+        setErrorMsg(null)
+      },1000) 
+      return;
+    }
   
     sendTransaction({
       to: connection.addresses[0],
@@ -48,7 +53,7 @@ function App() {
               </div>
             </div>
             <div className="flex justify-baseline border-b-[0.1px] p-2">
-              Your Address: {shortenAddress(connection.addresses?.[0])}
+              Address: {shortenAddress(connection.addresses?.[0])}
             </div>
           </div>
           <div className="flex">
@@ -68,7 +73,7 @@ function App() {
                 {isPending ? "Sending..." : "Send 0.01 ETH"}
               </button>
               {isSuccess && <p>Transaction sent!</p>}
-             {errorMsg && <p className="bg-amber-50 text-black h-20 w-40 overflow-hidden">{errorMsg}</p>}
+             {errorMsg && <p className="flex bg-amber-50 text-black h-20 w-50 justify-center items-center">{errorMsg}</p>}
              </div>
           </div>
         </div>
