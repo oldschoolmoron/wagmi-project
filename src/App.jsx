@@ -1,13 +1,18 @@
-import { useConnect, useConnection, useConnectors, useDisconnect } from "wagmi";
+import { useAccount, useConnect, useConnection, useConnectors, useDisconnect } from "wagmi";
+import { mainnet } from 'wagmi/chains'
 import "tailwindcss";
 import { useSendTransaction } from "wagmi"
 import { parseEther } from "viem"
 import { useEffect, useState } from "react"
+
+
 function App() {
+
   const connection = useConnection();
   const { connect, status, error } = useConnect();
   const connectors = useConnectors();
   const { disconnect } = useDisconnect();
+  const { connector } = useAccount();
 
   const { sendTransaction, isPending, isSuccess, error:txError } = useSendTransaction();
   const [ errorMsg, setErrorMsg ] = useState();
@@ -49,11 +54,20 @@ function App() {
             <div className="flex justify-center border-b-[0.1px] pb-1">
               <div className="pr-5">Status: {connection.status}</div>
               <div className="pl-5 border-l-[0.1px]">
-                ChainId: {connection.chainId}
+                ChainId: {connection.chainId} <br/>
+                Network name: {mainnet.name} mainnet
               </div>
             </div>
-            <div className="flex justify-baseline border-b-[0.1px] p-2">
+            <div className="flex justify-between border-b-[0.1px] p-2">
               Address: {shortenAddress(connection.addresses?.[0])}
+              {connection.status === 'connected' && (
+                <div>
+                  wallet: {connector.name}
+                </div>
+              )}
+            </div>
+            <div className="flex justify-baseline border-b-[0.1px] p-2">
+              Recipient address: {}
             </div>
           </div>
           <div className="flex">
