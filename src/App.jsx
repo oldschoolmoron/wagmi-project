@@ -2,6 +2,7 @@ import { useConnect, useConnection, useConnectors, useDisconnect } from "wagmi";
 import "tailwindcss";
 import { useSendTransaction } from "wagmi";
 import { parseEther } from "viem"
+import { useEffect, useState } from "react";
 function App() {
   const connection = useConnection();
   const { connect, status, error } = useConnect();
@@ -9,11 +10,22 @@ function App() {
   const { disconnect } = useDisconnect();
 
   const { sendTransaction, isPending, isSuccess, error:txError } = useSendTransaction();
+  const [ errorMsg, setErrorMsg ] = useState();
 
   function shortenAddress(address) {
     if (!address) return "";
     return `${address.slice(0, 6)}...${address.slice(-5)}`;
   }
+  useEffect(()=>{
+    if (!txError) return;
+    setErrorMsg(()=> {
+      return `${txError.message.slice(0, 50)}`});
+    const time = setTimeout(() => {
+      setErrorMsg(null)
+    }, 3000)
+    return () => clearTimeout(time)
+  }, [txError])
+
   function sendEth() {
     if (!connection.addresses?.[0]) return;
   
@@ -22,7 +34,7 @@ function App() {
       value: parseEther("0.01"),
     });
   }
-  
+
   return (
     <div>
       <div className="mx-auto flex w-150 h-150 mt-20 flex-col rounded-2xl items-center bg-slate-800">
@@ -38,7 +50,6 @@ function App() {
             <div className="flex justify-baseline border-b-[0.1px] p-2">
               Your Address: {shortenAddress(connection.addresses?.[0])}
             </div>
-            
           </div>
           <div className="flex">
           <div>
@@ -57,8 +68,8 @@ function App() {
                 {isPending ? "Sending..." : "Send 0.01 ETH"}
               </button>
               {isSuccess && <p>Transaction sent!</p>}
-              {error && <p>Error: {error.message}</p>}
-            </div>
+             {errorMsg && <p className="bg-amber-50 text-black h-20 w-40 overflow-hidden">{errorMsg}</p>}
+             </div>
           </div>
         </div>
 
@@ -67,7 +78,7 @@ function App() {
           <div>
             {connectors.map((connector) => (
               <button
-                class="bg-sky-500 p-2 rounded-xl m-2 hover:bg-sky-700"
+                className="bg-sky-500 p-2 rounded-xl m-2 hover:bg-sky-700"
                 key={connector.uid}
                 onClick={() => connect({ connector })}
                 type="button"
@@ -77,7 +88,7 @@ function App() {
             ))}
           </div>
 
-          <div class="text-gray-400">{status}</div>
+          <div className="text-gray-400">{status}</div>
           <div className="text-gray-400">{error?.message}</div>
         </div>
       </div>
