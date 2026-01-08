@@ -1,20 +1,38 @@
 import { useAccount, useConnect, useConnection, useConnectors, useDisconnect } from "wagmi";
-import { mainnet } from 'wagmi/chains'
+import { mainnet, sepolia, bsc } from 'wagmi/chains';
+import { createConfig, http } from "wagmi";
+import { useSwitchChain } from "wagmi";
 import "tailwindcss";
-import { useSendTransaction } from "wagmi"
-import { parseEther } from "viem"
-import { useEffect, useState } from "react"
+import { useSendTransaction } from "wagmi";
+import { parseEther } from "viem";
+import { useEffect, useState } from "react";
 
+
+export const config =  createConfig({
+  chains : [mainnet, sepolia, bsc],
+  transports:{
+    [sepolia.id] :http(),
+    [mainnet.id]: http(),
+    [bsc.id]:http(),
+  }
+})
 
 function App() {
-
+  const { switchChain, isPending:isConnecting } = useSwitchChain();
   const connection = useConnection();
   const { connect, status, error } = useConnect();
   const connectors = useConnectors();
   const { disconnect } = useDisconnect();
   const { connector } = useAccount();
 
-  const { sendTransaction, isPending, isSuccess, error:txError } = useSendTransaction();
+  const chainMap = {
+      [sepolia.id]:sepolia,
+    [mainnet.id]:mainnet,
+    [bsc.id]:bsc
+  }
+  const activeChain = chainMap[connection.chainId];
+
+  const { sendTransaction, isPending:isSending, isSuccess, error:txError } = useSendTransaction();
   const [ errorMsg, setErrorMsg ] = useState();
 
   function shortenAddress(address) {
@@ -33,9 +51,9 @@ function App() {
   function sendEth() {
     if (!connection.addresses?.[0]){
       setErrorMsg('No address found. Please connect your wallet.')
-      const time = setTimeout(()=> {
+      const time = setTimeout(()=> { 
         setErrorMsg(null)
-      },1000) 
+      },1000)
       return;
     }
   
@@ -54,8 +72,12 @@ function App() {
             <div className="flex justify-center border-b-[0.1px] pb-1">
               <div className="pr-5">Status: {connection.status}</div>
               <div className="pl-5 border-l-[0.1px]">
-                ChainId: {connection.chainId} <br/>
-                Network name: {mainnet.name} mainnet
+                {activeChain ? (
+                  <>
+                  ChainId: {activeChain.id} <br/>
+                  Network name: {activeChain.name}
+                  </>
+                ):<p> no network found</p>}
               </div>
             </div>
             <div className="flex justify-between border-b-[0.1px] p-2">
@@ -83,8 +105,8 @@ function App() {
             )}
             </div>
             <div>
-              <button className="bg-sky-500 p-2 rounded-xl mr-5 hover:bg-sky-700" type="button" onClick={sendEth} disabled={isPending}>
-                {isPending ? "Sending..." : "Send 0.01 ETH"}
+              <button className="bg-sky-500 p-2 rounded-xl mr-5 hover:bg-sky-700" type="button" onClick={sendEth} disabled={isSending}>
+                {isSending ? "Sending..." : "Send 0.01 ETH"}
               </button>
               {isSuccess && <p>Transaction sent!</p>}
              {errorMsg && <p className="flex bg-amber-50 text-black h-20 w-50 justify-center items-center">{errorMsg}</p>}
