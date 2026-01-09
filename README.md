@@ -1,2 +1,2 @@
 I have designed the UI for the basic wagmi wallet structure, which is provided by default by wagmi. On top of that, I configured the network where the contract is deployed and added some additional details to provide more context. Add some wallets in your extension to see how it works.
-![UI preview][assets/image.png]
+![UI preview](assets/image.png)
